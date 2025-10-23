@@ -20,7 +20,7 @@ export function Layout() {
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">{user?.displayName}</span>
+              <Link to="/profile" className="text-sm text-gray-700 hover:underline">{user?.displayName}</Link>
               <button onClick={handleLogout} className="btn btn-secondary text-sm">
                 Logout
               </button>

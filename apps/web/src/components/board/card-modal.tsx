@@ -8,8 +8,40 @@ import { Calendar, Tag, User, AlignLeft, Trash2 } from 'lucide-react';
 import { Avatar } from '../ui/avatar';
 import { cn } from '@/lib/utils';
 
+interface CardMemberUser {
+  id: string;
+  email?: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}
+
+interface CardMember {
+  id: string;
+  user: CardMemberUser;
+}
+
+interface CardLabel {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface Card {
+  id: string;
+  title: string;
+  description?: string | null;
+  listId: string;
+  priority?: string | null;
+  labels?: CardLabel[];
+  members?: CardMember[];
+  dueDate?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { comments?: number; attachments?: number };
+}
+
 interface CardModalProps {
-  card: any;
+  card: Card;
   open: boolean;
   onClose: () => void;
 }
@@ -17,12 +49,17 @@ interface CardModalProps {
 export function CardModal({ card, open, onClose }: CardModalProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [newMemberId, setNewMemberId] = useState<string>('');
+  const [newLabelName, setNewLabelName] = useState('');
+  const [newLabelColor, setNewLabelColor] = useState('#10b981');
+  const [dueDateValue, setDueDateValue] = useState<string | null>(card.dueDate ? new Date(card.dueDate).toISOString().slice(0, 10) : null);
   const [title, setTitle] = useState(card.title);
   const [description, setDescription] = useState(card.description || '');
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => cardsApi.updateCard(card.id, data),
+    mutationFn: (data: Partial<Card>) => cardsApi.updateCard(card.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards', card.listId] });
       setIsEditingTitle(false);
@@ -36,6 +73,32 @@ export function CardModal({ card, open, onClose }: CardModalProps) {
       queryClient.invalidateQueries({ queryKey: ['cards', card.listId] });
       onClose();
     },
+  });
+
+  const addMemberMutation = useMutation({
+    mutationFn: (userId: string) => cardsApi.addMember(card.id, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', card.listId] });
+      setNewMemberId('');
+    },
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: (userId: string) => cardsApi.removeMember(card.id, userId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards', card.listId] }),
+  });
+
+  const addLabelMutation = useMutation({
+    mutationFn: (data: { name: string; color: string }) => cardsApi.addLabel(card.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', card.listId] });
+      setNewLabelName('');
+    },
+  });
+
+  const removeLabelMutation = useMutation({
+    mutationFn: (labelId: string) => cardsApi.removeLabel(card.id, labelId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards', card.listId] }),
   });
 
   const handleUpdateTitle = () => {
@@ -154,7 +217,7 @@ export function CardModal({ card, open, onClose }: CardModalProps) {
                   <h3 className="text-sm font-semibold text-gray-700">Labels</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {card.labels.map((label: any) => (
+                  {card.labels?.map((label: CardLabel) => (
                     <span
                       key={label.id}
                       className="px-3 py-1 text-sm font-medium rounded-lg text-white"
@@ -175,7 +238,7 @@ export function CardModal({ card, open, onClose }: CardModalProps) {
                   <h3 className="text-sm font-semibold text-gray-700">Members</h3>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {card.members.map((member: any) => (
+                  {card.members?.map((member: CardMember) => (
                     <div key={member.id} className="flex items-center gap-2">
                       <Avatar user={member.user} size="sm" />
                       <span className="text-sm text-gray-700">{member.user.displayName}</span>
@@ -207,18 +270,136 @@ export function CardModal({ card, open, onClose }: CardModalProps) {
           {/* Sidebar Actions */}
           <div className="space-y-2">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Actions</h3>
-            <Button variant="secondary" size="sm" className="w-full justify-start">
-              <User className="w-4 h-4 mr-2" />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full justify-start rounded-full py-2 px-3 bg-gray-100 hover:bg-gray-200"
+              onClick={() => setSelectedAction(selectedAction === 'members' ? null : 'members')}
+            >
+              <User className="w-4 h-4 mr-3 text-gray-700" />
               Members
             </Button>
-            <Button variant="secondary" size="sm" className="w-full justify-start">
-              <Tag className="w-4 h-4 mr-2" />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full justify-start rounded-full py-2 px-3 bg-gray-100 hover:bg-gray-200"
+              onClick={() => setSelectedAction(selectedAction === 'labels' ? null : 'labels')}
+            >
+              <Tag className="w-4 h-4 mr-3 text-gray-700" />
               Labels
             </Button>
-            <Button variant="secondary" size="sm" className="w-full justify-start">
-              <Calendar className="w-4 h-4 mr-2" />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full justify-start rounded-full py-2 px-3 bg-gray-100 hover:bg-gray-200"
+              onClick={() => setSelectedAction(selectedAction === 'duedate' ? null : 'duedate')}
+            >
+              <Calendar className="w-4 h-4 mr-3 text-gray-700" />
               Due Date
             </Button>
+
+            {/* Action panels: Members / Labels / Due Date */}
+            {selectedAction === 'members' && (
+              <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700">
+                <div className="font-medium mb-2">Members</div>
+                <div className="space-y-2">
+                  {card.members && card.members.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      {card.members.map((m: CardMember) => (
+                        <div key={m.id} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Avatar user={m.user} size="sm" />
+                            <div className="text-sm text-gray-700">{m.user.displayName}</div>
+                          </div>
+                          <Button size="sm" variant="ghost" onClick={() => removeMemberMutation.mutate(m.user.id)}>
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500">No members</div>
+                  )}
+
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      value={newMemberId}
+                      onChange={(e) => setNewMemberId(e.target.value)}
+                      placeholder="User ID to add"
+                      className="flex-1"
+                    />
+                    <Button size="sm" onClick={() => addMemberMutation.mutate(newMemberId)} disabled={!newMemberId}>
+                      Add
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Button size="sm" variant="ghost" onClick={() => setSelectedAction(null)}>Close</Button>
+                </div>
+              </div>
+            )}
+
+            {selectedAction === 'labels' && (
+              <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700">
+                <div className="font-medium mb-2">Labels</div>
+                <div className="flex flex-col gap-2">
+                  {card.labels && card.labels.length > 0 ? (
+                    card.labels.map((label: CardLabel) => (
+                      <div key={label.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded" style={{ backgroundColor: label.color }} />
+                          <div className="text-sm text-gray-700">{label.name}</div>
+                        </div>
+                        <Button size="sm" variant="ghost" onClick={() => removeLabelMutation.mutate(label.id)}>
+                          Remove
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-gray-500">No labels</div>
+                  )}
+
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      value={newLabelName}
+                      onChange={(e) => setNewLabelName(e.target.value)}
+                      placeholder="Label name"
+                      className="flex-1"
+                    />
+                    <input type="color" value={newLabelColor} onChange={(e) => setNewLabelColor(e.target.value)} className="w-10 h-8 rounded" />
+                    <Button size="sm" onClick={() => addLabelMutation.mutate({ name: newLabelName, color: newLabelColor })} disabled={!newLabelName}>
+                      Add
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Button size="sm" variant="ghost" onClick={() => setSelectedAction(null)}>Close</Button>
+                </div>
+              </div>
+            )}
+
+            {selectedAction === 'duedate' && (
+              <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700">
+                <div className="font-medium mb-2">Due Date</div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={dueDateValue ?? ''}
+                    onChange={(e) => setDueDateValue(e.target.value || null)}
+                    className="rounded border border-gray-300 px-2 py-1"
+                  />
+                  <Button size="sm" onClick={() => updateMutation.mutate({ dueDate: dueDateValue ? new Date(dueDateValue).toISOString() : null })}>
+                    Save
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setDueDateValue(null); updateMutation.mutate({ dueDate: null }); }}>
+                    Clear
+                  </Button>
+                </div>
+                <div className="mt-3">
+                  <Button size="sm" variant="ghost" onClick={() => setSelectedAction(null)}>Close</Button>
+                </div>
+              </div>
+            )}
             <div className="pt-2 border-t border-gray-200">
               <Button 
                 variant="danger" 
