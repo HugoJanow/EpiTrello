@@ -1,0 +1,43 @@
+{
+  "name": "epitrello",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EpiTrello - Alternative légère à Trello",
+  "scripts": {
+    "dev": "pnpm run --parallel --filter './apps/*' dev",
+    "dev:api": "pnpm --filter @epitrello/api dev",
+    "dev:web": "pnpm --filter @epitrello/web dev",
+    "build": "pnpm --filter './apps/*' --recursive build",
+    "lint": "pnpm --recursive lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm --recursive typecheck",
+    "test": "pnpm --recursive test",
+    "test:api": "pnpm --filter @epitrello/api test",
+    "test:web": "pnpm --filter @epitrello/web test",
+    "db:generate": "pnpm --filter @epitrello/db generate",
+    "db:migrate": "pnpm --filter @epitrello/db migrate",
+    "db:migrate:dev": "pnpm --filter @epitrello/db migrate:dev",
+    "db:seed": "pnpm --filter @epitrello/db seed",
+    "db:studio": "pnpm --filter @epitrello/db studio",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.6.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

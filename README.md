@@ -30,7 +30,6 @@
 ### Stack Technique
 
 #### Backend (`apps/api`)
-
 - **Fastify** - Serveur HTTP performant
 - **TypeScript** strict mode
 - **Prisma** - ORM type-safe
@@ -41,7 +40,6 @@
 - **Vitest** - Tests unitaires & E2E
 
 #### Frontend (`apps/web`)
-
 - **React 18** + **TypeScript**
 - **Vite** - Build ultra-rapide
 - **Tailwind CSS** - Styling utility-first
@@ -53,7 +51,6 @@
 - **Playwright** - Tests E2E
 
 #### Database (`packages/db`)
-
 - **PostgreSQL 16**
 - **Prisma** - Migrations + client typé
 - Modèle complet avec relations :
@@ -165,51 +162,50 @@ pnpm test:web         # Tests web
 
 ### Authentication
 
-| Méthode | Endpoint         | Description          |
-| ------- | ---------------- | -------------------- |
-| POST    | `/auth/register` | Inscription          |
-| POST    | `/auth/login`    | Connexion            |
-| POST    | `/auth/refresh`  | Refresh access token |
-| GET     | `/auth/me`       | User actuel          |
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/auth/register` | Inscription |
+| POST | `/auth/login` | Connexion |
+| POST | `/auth/refresh` | Refresh access token |
+| GET | `/auth/me` | User actuel |
 
 ### Boards
 
-| Méthode | Endpoint      | Description        |
-| ------- | ------------- | ------------------ |
-| GET     | `/boards`     | Liste des boards   |
-| GET     | `/boards/:id` | Détails d'un board |
-| POST    | `/boards`     | Créer un board     |
-| PATCH   | `/boards/:id` | Modifier un board  |
-| DELETE  | `/boards/:id` | Supprimer un board |
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/boards` | Liste des boards |
+| GET | `/boards/:id` | Détails d'un board |
+| POST | `/boards` | Créer un board |
+| PATCH | `/boards/:id` | Modifier un board |
+| DELETE | `/boards/:id` | Supprimer un board |
 
 ### Lists
 
-| Méthode | Endpoint             | Description          |
-| ------- | -------------------- | -------------------- |
-| GET     | `/lists?boardId=xxx` | Listes d'un board    |
-| GET     | `/lists/:id`         | Détails d'une liste  |
-| POST    | `/lists`             | Créer une liste      |
-| PATCH   | `/lists/:id`         | Modifier une liste   |
-| DELETE  | `/lists/:id`         | Supprimer une liste  |
-| POST    | `/lists/reorder`     | Réordonner une liste |
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/lists?boardId=xxx` | Listes d'un board |
+| GET | `/lists/:id` | Détails d'une liste |
+| POST | `/lists` | Créer une liste |
+| PATCH | `/lists/:id` | Modifier une liste |
+| DELETE | `/lists/:id` | Supprimer une liste |
+| POST | `/lists/reorder` | Réordonner une liste |
 
 ### Cards
 
-| Méthode | Endpoint                     | Description               |
-| ------- | ---------------------------- | ------------------------- |
-| GET     | `/cards?listId=xxx`          | Cartes d'une liste        |
-| GET     | `/cards/:id`                 | Détails d'une carte       |
-| POST    | `/cards`                     | Créer une carte           |
-| PATCH   | `/cards/:id`                 | Modifier une carte        |
-| DELETE  | `/cards/:id`                 | Supprimer une carte       |
-| POST    | `/cards/reorder`             | Réordonner/déplacer carte |
-| POST    | `/cards/:id/members`         | Ajouter un membre         |
-| DELETE  | `/cards/:id/members/:userId` | Retirer un membre         |
-| POST    | `/cards/:id/labels`          | Ajouter un label          |
-| DELETE  | `/cards/:id/labels/:labelId` | Retirer un label          |
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/cards?listId=xxx` | Cartes d'une liste |
+| GET | `/cards/:id` | Détails d'une carte |
+| POST | `/cards` | Créer une carte |
+| PATCH | `/cards/:id` | Modifier une carte |
+| DELETE | `/cards/:id` | Supprimer une carte |
+| POST | `/cards/reorder` | Réordonner/déplacer carte |
+| POST | `/cards/:id/members` | Ajouter un membre |
+| DELETE | `/cards/:id/members/:userId` | Retirer un membre |
+| POST | `/cards/:id/labels` | Ajouter un label |
+| DELETE | `/cards/:id/labels/:labelId` | Retirer un label |
 
 Toutes les routes (sauf `/auth/*`) nécessitent un header :
-
 ```
 Authorization: Bearer <accessToken>
 ```
@@ -269,7 +265,6 @@ Les `List` et `Card` utilisent un champ `order: Float` pour le réordonnancement
 - **Compaction** (si saturation) : réinitialiser avec des gaps de 1000
 
 Avantages :
-
 - Pas de renumérotation en cascade
 - Performances optimales
 - Simple à implémenter
@@ -350,7 +345,6 @@ MIT - voir [LICENSE](LICENSE)
 ## 🙏 Crédits
 
 Construit avec ❤️ en utilisant :
-
 - [Fastify](https://fastify.dev)
 - [React](https://react.dev)
 - [Prisma](https://prisma.io)

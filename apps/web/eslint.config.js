@@ -43,34 +43,6 @@ export default [
     },
   },
   {
-    files: ['**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-    },
-    rules: {
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-    },
-  },
-  {
-    ignores: [
-      'dist/**',
-      'build/**',
-      'node_modules/**',
-      'apps/web/eslint.config.js',
-      'apps/api/eslint.config.js',
-      'configs/eslint.config.js',
-      'configs/eslint.react.config.js'
-    ],
+    ignores: ['dist', 'node_modules', 'build'],
   },
 ];

@@ -1,0 +1,184 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  avatarUrl    String?  @map("avatar_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  boards         Board[]
+  cardMembers    CardMember[]
+  activityLogs   ActivityLog[]
+  refreshTokens  RefreshToken[]
+
+  @@map("users")
+}
+
+// RefreshToken model for JWT refresh tokens
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// Board model
+model Board {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  ownerId     String   @map("owner_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  lists        List[]
+  activityLogs ActivityLog[]
+
+  @@index([ownerId])
+  @@map("boards")
+}
+
+// List model (columns in a board)
+model List {
+  id        String   @id @default(cuid())
+  title     String
+  boardId   String   @map("board_id")
+  order     Float    @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards Card[]
+
+  @@index([boardId])
+  @@index([boardId, order])
+  @@map("lists")
+}
+
+// Card model
+model Card {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  listId      String        @map("list_id")
+  order       Float         @default(0)
+  priority    CardPriority  @default(MEDIUM)
+  dueDate     DateTime?     @map("due_date")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  list         List          @relation(fields: [listId], references: [id], onDelete: Cascade)
+  members      CardMember[]
+  labels       CardLabel[]
+  activityLogs ActivityLog[]
+
+  @@index([listId])
+  @@index([listId, order])
+  @@map("cards")
+}
+
+// CardPriority enum
+enum CardPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// CardMember model (many-to-many between Card and User)
+model CardMember {
+  id        String   @id @default(cuid())
+  cardId    String   @map("card_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, userId])
+  @@index([cardId])
+  @@index([userId])
+  @@map("card_members")
+}
+
+// CardLabel model
+model CardLabel {
+  id        String   @id @default(cuid())
+  cardId    String   @map("card_id")
+  name      String
+  color     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@map("card_labels")
+}
+
+// ActivityLog model for tracking changes
+model ActivityLog {
+  id        String       @id @default(cuid())
+  boardId   String?      @map("board_id")
+  cardId    String?      @map("card_id")
+  userId    String       @map("user_id")
+  action    ActivityType
+  metadata  Json?
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  board Board? @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  card  Card?  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([boardId])
+  @@index([cardId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// ActivityType enum
+enum ActivityType {
+  BOARD_CREATED
+  BOARD_UPDATED
+  BOARD_DELETED
+  LIST_CREATED
+  LIST_UPDATED
+  LIST_DELETED
+  LIST_MOVED
+  CARD_CREATED
+  CARD_UPDATED
+  CARD_DELETED
+  CARD_MOVED
+  MEMBER_ADDED
+  MEMBER_REMOVED
+  LABEL_ADDED
+  LABEL_REMOVED
+}
