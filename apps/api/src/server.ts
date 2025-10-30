@@ -15,6 +15,7 @@ import { authRoutes } from './modules/auth/routes.js';
 import { boardRoutes } from './modules/boards/routes.js';
 import { listRoutes } from './modules/lists/routes.js';
 import { cardRoutes } from './modules/cards/routes.js';
+import { usersRoutes } from './modules/users/routes.js';
 
 /**
  * Create and configure Fastify server instance
@@ -58,6 +59,7 @@ export async function createServer() {
   await server.register(boardRoutes, { prefix: '/boards' });
   await server.register(listRoutes, { prefix: '/lists' });
   await server.register(cardRoutes, { prefix: '/cards' });
+  await server.register(usersRoutes, { prefix: '/users' });
 
   // Health check
   server.get('/health', async () => {

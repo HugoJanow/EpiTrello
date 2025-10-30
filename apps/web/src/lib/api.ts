@@ -35,42 +35,50 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
   return response.json();
 }
 
+// Basic types
+export interface User {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
 // Auth API
 export const authApi = {
   register: (data: { email: string; password: string; displayName: string }) =>
-    fetchApi<{ user: any; accessToken: string; refreshToken: string }>('/auth/register', {
+    fetchApi<{ user: User; accessToken: string; refreshToken: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   login: (data: { email: string; password: string }) =>
-    fetchApi<{ user: any; accessToken: string; refreshToken: string }>('/auth/login', {
+    fetchApi<{ user: User; accessToken: string; refreshToken: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  me: () => fetchApi<{ user: any }>('/auth/me'),
+  me: () => fetchApi<{ user: User }>('/auth/me'),
 };
 
 // Boards API
 export const boardsApi = {
-  getBoards: () => fetchApi<{ boards: any[] }>('/boards'),
-  getBoard: (id: string) => fetchApi<any>(`/boards/${id}`),
+  getBoards: () => fetchApi<{ boards: unknown[] }>('/boards'),
+  getBoard: (id: string) => fetchApi<unknown>(`/boards/${id}`),
   createBoard: (data: { title: string; description?: string }) =>
-    fetchApi<any>('/boards', { method: 'POST', body: JSON.stringify(data) }),
+    fetchApi<unknown>('/boards', { method: 'POST', body: JSON.stringify(data) }),
   updateBoard: (id: string, data: { title?: string; description?: string }) =>
-    fetchApi<any>(`/boards/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    fetchApi<unknown>(`/boards/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteBoard: (id: string) =>
     fetchApi<void>(`/boards/${id}`, { method: 'DELETE' }),
 };
 
 // Lists API
 export const listsApi = {
-  getLists: (boardId: string) => fetchApi<{ lists: any[] }>(`/lists?boardId=${boardId}`),
+  getLists: (boardId: string) => fetchApi<{ lists: unknown[] }>(`/lists?boardId=${boardId}`),
   createList: (data: { title: string; boardId: string }) =>
-    fetchApi<any>('/lists', { method: 'POST', body: JSON.stringify(data) }),
+    fetchApi<unknown>('/lists', { method: 'POST', body: JSON.stringify(data) }),
   updateList: (id: string, data: { title?: string; order?: number }) =>
-    fetchApi<any>(`/lists/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    fetchApi<unknown>(`/lists/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteList: (id: string) => fetchApi<void>(`/lists/${id}`, { method: 'DELETE' }),
   reorderList: (data: { boardId: string; listId: string; newOrder: number }) =>
     fetchApi<void>('/lists/reorder', { method: 'POST', body: JSON.stringify(data) }),
@@ -78,21 +86,28 @@ export const listsApi = {
 
 // Cards API
 export const cardsApi = {
-  getCards: (listId: string) => fetchApi<{ cards: any[] }>(`/cards?listId=${listId}`),
-  getCard: (id: string) => fetchApi<any>(`/cards/${id}`),
-  createCard: (data: any) =>
-    fetchApi<any>('/cards', { method: 'POST', body: JSON.stringify(data) }),
-  updateCard: (id: string, data: any) =>
-    fetchApi<any>(`/cards/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  getCards: (listId: string) => fetchApi<{ cards: unknown[] }>(`/cards?listId=${listId}`),
+  getCard: (id: string) => fetchApi<unknown>(`/cards/${id}`),
+  createCard: (data: unknown) =>
+    fetchApi<unknown>('/cards', { method: 'POST', body: JSON.stringify(data) }),
+  updateCard: (id: string, data: unknown) =>
+    fetchApi<unknown>(`/cards/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteCard: (id: string) => fetchApi<void>(`/cards/${id}`, { method: 'DELETE' }),
   reorderCard: (data: { cardId: string; listId: string; newOrder: number }) =>
     fetchApi<void>('/cards/reorder', { method: 'POST', body: JSON.stringify(data) }),
   addMember: (cardId: string, userId: string) =>
-    fetchApi<any>(`/cards/${cardId}/members`, { method: 'POST', body: JSON.stringify({ userId }) }),
+    fetchApi<unknown>(`/cards/${cardId}/members`, { method: 'POST', body: JSON.stringify({ userId }) }),
   removeMember: (cardId: string, userId: string) =>
     fetchApi<void>(`/cards/${cardId}/members/${userId}`, { method: 'DELETE' }),
   addLabel: (cardId: string, data: { name: string; color: string }) =>
-    fetchApi<any>(`/cards/${cardId}/labels`, { method: 'POST', body: JSON.stringify(data) }),
+    fetchApi<unknown>(`/cards/${cardId}/labels`, { method: 'POST', body: JSON.stringify(data) }),
   removeLabel: (cardId: string, labelId: string) =>
     fetchApi<void>(`/cards/${cardId}/labels/${labelId}`, { method: 'DELETE' }),
+};
+
+// Users API
+export const usersApi = {
+  getMe: () => fetchApi<{ user: User }>('/users/me'),
+  updateMe: (data: { displayName?: string; avatarUrl?: string | null }) =>
+    fetchApi<{ user: User }>('/users/me', { method: 'PUT', body: JSON.stringify(data) }),
 };
