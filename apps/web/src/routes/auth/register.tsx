@@ -29,8 +29,9 @@ export function RegisterPage() {
       const result = await authApi.register(data);
       setAuth(result.accessToken, result.refreshToken, result.user);
       navigate('/boards');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || 'Registration failed');
     }
   };
 

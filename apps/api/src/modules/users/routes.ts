@@ -6,6 +6,27 @@ import { avatarRoute } from './avatar-route.js';
 
 export const usersRoutes: FastifyPluginAsync = async (server) => {
   const usersService = new UsersService(server.prisma);
+  type SerializedUser = {
+    id: string;
+    email: string;
+    displayName: string;
+    avatarUrl: string | null;
+    createdAt: string;
+  };
+
+  function serializeUser(u: unknown): SerializedUser | null {
+    if (!u) return null;
+    const uu = u as { [k: string]: unknown; createdAt?: unknown };
+    const createdAt = uu.createdAt;
+    const createdAtStr = createdAt instanceof Date ? createdAt.toISOString() : String(createdAt ?? '');
+    return {
+      id: String(uu.id ?? ''),
+      email: String(uu.email ?? ''),
+      displayName: String(uu.displayName ?? ''),
+      avatarUrl: (uu.avatarUrl as string) ?? null,
+      createdAt: createdAtStr,
+    };
+  }
 
   // GET /users/me - return current user
   server.withTypeProvider<ZodTypeProvider>().route({
@@ -19,8 +40,9 @@ export const usersRoutes: FastifyPluginAsync = async (server) => {
     },
     handler: async (request, reply) => {
       const payload = request.user as { sub: string; email: string };
-      const user = await usersService.getUserById(payload.sub);
-      reply.send({ user });
+  const user = await usersService.getUserById(payload.sub);
+  if (!user) return reply.code(404).send();
+  reply.send({ user: serializeUser(user) as SerializedUser });
     },
   });
 
@@ -37,8 +59,40 @@ export const usersRoutes: FastifyPluginAsync = async (server) => {
     },
     handler: async (request, reply) => {
       const payload = request.user as { sub: string; email: string };
-      const updated = await usersService.updateUser(payload.sub, request.body);
-      reply.send({ user: updated });
+  const updated = await usersService.updateUser(payload.sub, request.body);
+  reply.send({ user: serializeUser(updated) as SerializedUser });
+    },
+  });
+
+  // PUT /users/password - change current user's password
+  server.withTypeProvider<ZodTypeProvider>().route({
+    method: 'PUT',
+    url: '/password',
+    onRequest: [server.authenticate],
+    schema: {
+      body: (await import('./schemas.js')).changePasswordSchema,
+    },
+    handler: async (request, reply) => {
+      const payload = request.user as { sub: string };
+      const body = request.body as { currentPassword: string; newPassword: string };
+      try {
+        await usersService.changePassword(payload.sub, body.currentPassword, body.newPassword);
+        reply.send({ ok: true });
+      } catch (err) {
+        reply.code(400).send({ error: { message: err instanceof Error ? err.message : 'Failed' } });
+      }
+    },
+  });
+
+  // DELETE /users/me - delete current user
+  server.withTypeProvider<ZodTypeProvider>().route({
+    method: 'DELETE',
+    url: '/me',
+    onRequest: [server.authenticate],
+    handler: async (request, reply) => {
+      const payload = request.user as { sub: string };
+      await usersService.deleteUser(payload.sub);
+      reply.code(204).send();
     },
   });
 

@@ -4,14 +4,28 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { cardsApi, listsApi } from '@/lib/api';
 import { Card } from './card';
+import type { Card as CardType } from './card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Plus, MoreVertical, Pencil, Trash2, X } from 'lucide-react';
 
 interface BoardListProps {
-  list: any;
+  list: List;
   boardId: string;
+}
+
+interface List {
+  id: string;
+  title: string;
+}
+
+interface CardSummary {
+  id: string;
+  title?: string;
+  description?: string | null;
+  listId?: string;
+  labels?: Array<{ id: string; name: string; color?: string }>; 
 }
 
 export function BoardList({ list, boardId }: BoardListProps) {
@@ -76,7 +90,7 @@ export function BoardList({ list, boardId }: BoardListProps) {
     }
   };
 
-  const cards = cardsData?.cards || [];
+  const cards: CardSummary[] = (cardsData?.cards as CardSummary[]) || [];
 
   return (
     <div className="flex-shrink-0 w-[300px] h-fit max-h-[calc(100vh-200px)] flex flex-col bg-white rounded-xl shadow-sm border border-gray-200">
@@ -131,10 +145,10 @@ export function BoardList({ list, boardId }: BoardListProps) {
 
       {/* Cards Container */}
       <div className="flex-1 overflow-y-auto p-2">
-        <SortableContext items={cards.map((c: any) => c.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           <div ref={setNodeRef} className="space-y-2 min-h-[50px]">
-            {cards.map((card: any) => (
-              <Card key={card.id} card={card} />
+            {cards.map((card) => (
+              <Card key={card.id} card={card as CardType} />
             ))}
           </div>
         </SortableContext>

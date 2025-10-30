@@ -28,8 +28,9 @@ export function LoginPage() {
       const result = await authApi.login(data);
       setAuth(result.accessToken, result.refreshToken, result.user);
       navigate('/boards');
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || 'Login failed');
     }
   };
 

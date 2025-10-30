@@ -30,7 +30,7 @@ const jwtPlugin: FastifyPluginAsync = async (server) => {
   server.decorate('authenticate', async function (request, reply) {
     try {
       await request.jwtVerify();
-    } catch (err) {
+    } catch {
       reply.status(401).send({
         error: {
           code: 'UNAUTHORIZED',
@@ -50,13 +50,10 @@ export { jwtPlugin };
 declare module 'fastify' {
   interface FastifyInstance {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-    refreshSign: (payload: JwtPayload, options?: SignOptions) => string;
+  refreshSign: (payload: JwtPayload, options?: unknown) => string;
     refreshVerify: (token: string) => JwtPayload;
   }
-
-  interface FastifyRequest {
-    user: JwtPayload;
-  }
+  // Note: don't redeclare FastifyRequest.user to avoid conflicts with @fastify/jwt types
 }
 
 // JWT payload interface

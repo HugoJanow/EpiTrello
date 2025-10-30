@@ -1,6 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
-import { z } from 'zod';
 import { ListService } from './service.js';
 import * as schemas from './schemas.js';
 

@@ -2,6 +2,7 @@
   "name": "epitrello",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "EpiTrello - Alternative légère à Trello",
   "scripts": {
     "dev": "pnpm run --parallel --filter './apps/*' dev",

@@ -9,6 +9,13 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { createToast } from '@/lib/toast';
 
+interface Board {
+  id: string;
+  title: string;
+  description?: string | null;
+  updatedAt?: string;
+}
+
 export function BoardsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState('');
@@ -125,7 +132,7 @@ export function BoardsPage() {
 
         {/* Boards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {data?.boards.map((board: any) => (
+          {(data?.boards as Board[] | undefined)?.map((board: Board) => (
             <div key={board.id} className="relative">
               <Link
                 to={`/boards/${board.id}`}
@@ -144,7 +151,7 @@ export function BoardsPage() {
                       <Folder className="w-3 h-3" />
                       <span>Board</span>
                     </div>
-                    <span>{new Date(board.updatedAt).toLocaleDateString()}</span>
+                    <span>{board.updatedAt ? new Date(board.updatedAt).toLocaleDateString() : ''}</span>
                   </div>
                 </div>
                 <div className="absolute inset-0 ring-2 ring-transparent group-hover:ring-primary-400 rounded-xl transition-all" />

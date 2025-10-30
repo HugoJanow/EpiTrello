@@ -14,6 +14,25 @@ import {
 // arrayMove not used in this file (kept in other components)
 import { useState } from 'react';
 import { boardsApi, listsApi, cardsApi } from '@/lib/api';
+
+interface List {
+  id: string;
+  title: string;
+}
+
+interface Card {
+  id: string;
+  listId: string;
+  title: string;
+  description?: string | null;
+  labels?: Array<{ id: string; name: string; color: string }>;
+  members?: Array<{ id: string; user: { id: string; displayName: string; avatarUrl?: string | null } }>;
+  _count?: { comments?: number; attachments?: number };
+  createdAt: string;
+  updatedAt: string;
+  priority?: string | null;
+  dueDate?: string | null;
+}
 import { BoardList } from '@/components/board/board-list';
 import { Card } from '@/components/board/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +46,7 @@ export function BoardPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeCard, setActiveCard] = useState<any>(null);
+  const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [showNewList, setShowNewList] = useState(false);
 
   // Configure sensors for better drag experience
@@ -154,7 +173,7 @@ export function BoardPage() {
     );
   }
 
-  const lists = listsData?.lists || [];
+  const lists: List[] = (listsData?.lists as List[]) || [];
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -199,7 +218,7 @@ export function BoardPage() {
         >
           <div className="h-full p-6">
             <div className="flex gap-4 h-full pb-6">
-              {lists.map((list: any) => (
+              {lists.map((list: List) => (
                 <BoardList key={list.id} list={list} boardId={id!} />
               ))}
 

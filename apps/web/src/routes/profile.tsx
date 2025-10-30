@@ -16,6 +16,10 @@ export function ProfilePage() {
 
   const [displayName, setDisplayName] = useState<string | undefined>(storedUser?.displayName);
   const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(storedUser?.avatarUrl ?? undefined);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { clearAuth } = useAuthStore();
 
   const updateMutation = useMutation({
     mutationFn: (payload: { displayName?: string; avatarUrl?: string | null }) => usersApi.updateMe(payload),
@@ -27,6 +31,31 @@ export function ProfilePage() {
       // @ts-ignore
       useAuthStore.setState({ user: updated });
       queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (payload: { currentPassword: string; newPassword: string }) => usersApi.changePassword(payload),
+    onSuccess: () => {
+      alert('Password changed');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      alert(message || 'Failed to change password');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => usersApi.deleteMe(),
+    onSuccess: () => {
+      clearAuth();
+      window.location.href = '/login';
+    },
+    onError: () => {
+      alert('Failed to delete account');
     },
   });
 
@@ -108,6 +137,40 @@ export function ProfilePage() {
         <div className="mt-6 text-sm text-gray-500">
           <div><strong>User ID:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{user.id}</code></div>
           <div className="mt-2">Email: {user.email}</div>
+          <div className="mt-2">Created: {user.createdAt ? new Date(user.createdAt).toLocaleString() : '—'}</div>
+        </div>
+        
+        <div className="mt-6 border-t pt-4">
+          <h2 className="text-lg font-medium mb-3">Security</h2>
+          <div className="mb-3">
+            <label className="block text-sm text-gray-700">Current password</label>
+            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2" />
+          </div>
+          <div className="mb-3">
+            <label className="block text-sm text-gray-700">New password</label>
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2" />
+          </div>
+          <div className="mb-3">
+            <label className="block text-sm text-gray-700">Confirm new password</label>
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              className="bg-primary-600 text-white px-4 py-2 rounded"
+              onClick={() => {
+                if (!currentPassword || !newPassword) return alert('Please fill passwords');
+                if (newPassword !== confirmPassword) return alert('Passwords do not match');
+                changePasswordMutation.mutate({ currentPassword, newPassword });
+              }}
+              disabled={changePasswordMutation.status === 'pending'}
+            >
+              {changePasswordMutation.status === 'pending' ? 'Saving...' : 'Change password'}
+            </button>
+            <button className="text-red-600 hover:underline" onClick={() => {
+              if (!confirm('Are you sure you want to delete your account? This is irreversible.')) return;
+              deleteMutation.mutate();
+            }}>Delete account</button>
+          </div>
         </div>
       </div>
     </div>

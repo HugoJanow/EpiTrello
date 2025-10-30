@@ -6,8 +6,44 @@ import { Calendar, MessageSquare, Paperclip, GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CardModal } from './card-modal';
 
+interface Label {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface UserRef {
+  id: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}
+
+interface MemberRef {
+  id: string;
+  user: UserRef;
+}
+
+interface CardCount {
+  comments?: number;
+  attachments?: number;
+}
+
+export interface Card {
+  id: string;
+  listId: string;
+  title: string;
+  description?: string | null;
+  labels?: Label[];
+  priority?: string | null;
+  dueDate?: string | null;
+  _count?: CardCount;
+  members?: MemberRef[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface CardProps {
-  card: any;
+  card: Card;
   isDragging?: boolean;
 }
 
@@ -74,7 +110,7 @@ export function Card({ card, isDragging }: CardProps) {
           {/* Labels */}
           {card.labels && card.labels.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
-              {card.labels.map((label: any) => (
+              {card.labels.map((label) => (
                 <span
                   key={label.id}
                   className="text-xs px-2 py-0.5 rounded font-medium text-white"
@@ -101,17 +137,17 @@ export function Card({ card, isDragging }: CardProps) {
                 </div>
               )}
               
-              {card._count?.comments > 0 && (
+              {(card._count?.comments ?? 0) > 0 && (
                 <div className="flex items-center gap-1">
                   <MessageSquare className="w-3 h-3" />
-                  <span>{card._count.comments}</span>
+                  <span>{card._count?.comments ?? 0}</span>
                 </div>
               )}
               
-              {card._count?.attachments > 0 && (
+              {(card._count?.attachments ?? 0) > 0 && (
                 <div className="flex items-center gap-1">
                   <Paperclip className="w-3 h-3" />
-                  <span>{card._count.attachments}</span>
+                  <span>{card._count?.attachments ?? 0}</span>
                 </div>
               )}
             </div>
@@ -119,7 +155,7 @@ export function Card({ card, isDragging }: CardProps) {
             {/* Members */}
             {card.members && card.members.length > 0 && (
               <div className="flex -space-x-1.5">
-                {card.members.slice(0, 3).map((member: any, index: number) => (
+                {card.members.slice(0, 3).map((member: MemberRef, index: number) => (
                   <Avatar key={member.id || index} user={member.user} size="xs" />
                 ))}
                 {card.members.length > 3 && (

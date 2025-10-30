@@ -41,6 +41,7 @@ export interface User {
   email: string;
   displayName: string;
   avatarUrl: string | null;
+  createdAt?: string;
 }
 
 // Auth API
@@ -130,4 +131,7 @@ export const usersApi = {
 
     return res.json();
   },
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    fetchApi<{ ok: boolean }>('/users/password', { method: 'PUT', body: JSON.stringify(data) }),
+  deleteMe: () => fetchApi<void>('/users/me', { method: 'DELETE' }),
 };

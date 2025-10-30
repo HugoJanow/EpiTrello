@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 import { PrismaClient } from '@epitrello/db';
 import { Errors } from '../../lib/errors.js';
-import type { RegisterInput, LoginInput, AuthResponse } from './schemas.js';
+import type { RegisterInput, LoginInput } from './schemas.js';
 import type { JwtPayload } from '../../plugins/jwt.js';
 
 /**

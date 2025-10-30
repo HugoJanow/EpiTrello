@@ -42,7 +42,13 @@ export const avatarRoute: FastifyPluginAsync = async (server) => {
       // Update user
       const updated = await usersService.updateUser(payload.sub, { avatarUrl });
 
-      return reply.send({ user: updated });
+      // Ensure createdAt is serialized to string
+      const serialized = {
+        ...updated,
+        createdAt: updated.createdAt instanceof Date ? updated.createdAt.toISOString() : updated.createdAt,
+      };
+
+      return reply.send({ user: serialized });
     },
   });
 };
