@@ -23,6 +23,9 @@ model User {
   // Relations
   boards         Board[]
   cardMembers    CardMember[]
+  boardMembers   BoardMember[] @relation("UserToBoardMember")
+  invitationsSent     BoardInvitation[] @relation("UserToInviterInvitations")
+  invitationsReceived BoardInvitation[] @relation("UserToInvitedInvitations")
   activityLogs   ActivityLog[]
   refreshTokens  RefreshToken[]
 
@@ -56,6 +59,8 @@ model Board {
   // Relations
   owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   lists        List[]
+  boardMembers BoardMember[] @relation("BoardToBoardMember")
+  boardInvitations BoardInvitation[] @relation("BoardToInvitation")
   activityLogs ActivityLog[]
 
   @@index([ownerId])
@@ -181,4 +186,58 @@ enum ActivityType {
   MEMBER_REMOVED
   LABEL_ADDED
   LABEL_REMOVED
+}
+
+// Role enum for board membership
+enum BoardRole {
+  OWNER
+  MEMBER
+  VIEWER
+}
+
+// BoardMember model for board-level permissions
+model BoardMember {
+  id        String   @id @default(cuid())
+  boardId   String   @map("board_id")
+  userId    String   @map("user_id")
+  role      BoardRole
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  board Board @relation("BoardToBoardMember", fields: [boardId], references: [id], onDelete: Cascade)
+  user  User  @relation("UserToBoardMember", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, userId])
+  @@index([boardId])
+  @@index([userId])
+  @@map("board_members")
+}
+
+// Invitation status for board invites
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  REVOKED
+}
+
+// BoardInvitation model for in-app invites
+model BoardInvitation {
+  id            String           @id @default(cuid())
+  boardId       String           @map("board_id")
+  invitedUserId String?          @map("invited_user_id")
+  invitedEmail  String?          @map("invited_email")
+  inviterId     String           @map("inviter_id")
+  role          BoardRole
+  status        InvitationStatus @default(PENDING)
+  createdAt     DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  board   Board @relation("BoardToInvitation", fields: [boardId], references: [id], onDelete: Cascade)
+  inviter User  @relation("UserToInviterInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
+  invited User? @relation("UserToInvitedInvitations", fields: [invitedUserId], references: [id])
+
+  @@index([boardId])
+  @@index([invitedUserId])
+  @@map("board_invitations")
 }

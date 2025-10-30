@@ -10,6 +10,7 @@ import { RegisterPage } from './routes/auth/register';
 import { BoardsPage } from './routes/boards';
 import { BoardPage } from './routes/board';
 import { ProfilePage } from './routes/profile';
+import { InvitationsPage } from './routes/invitations';
 import { Layout } from './components/layout';
 
 const queryClient = new QueryClient({
@@ -76,6 +77,7 @@ export function App() {
             <Route path="/boards" element={<BoardsPage />} />
             <Route path="/boards/:id" element={<BoardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/invitations" element={<InvitationsPage />} />
           </Route>
 
           {/* Default redirect */}

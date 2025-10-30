@@ -132,6 +132,7 @@ export function ProfilePage() {
             {updateMutation.status === 'pending' ? 'Saving...' : 'Save'}
           </button>
           <Link to="/boards" className="text-primary-600 hover:underline">Back to boards</Link>
+          <Link to="/invitations" className="text-primary-600 hover:underline">My invitations</Link>
         </div>
 
         <div className="mt-6 text-sm text-gray-500">

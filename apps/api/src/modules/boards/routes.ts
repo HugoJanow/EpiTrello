@@ -10,6 +10,7 @@ import {
   boardSchema,
   boardListSchema,
 } from './schemas.js';
+ 
 
 /**
  * Board routes
@@ -31,7 +32,8 @@ export const boardRoutes: FastifyPluginAsync = async (server) => {
       },
     },
     handler: async (request, reply) => {
-      const result = await boardService.getBoards(request.user.sub, request.query);
+  const userId = (request.user as { sub?: string }).sub ?? '';
+      const result = await boardService.getBoards(userId, request.query);
       reply.send(result);
     },
   });
@@ -50,7 +52,8 @@ export const boardRoutes: FastifyPluginAsync = async (server) => {
       },
     },
     handler: async (request, reply) => {
-      const board = await boardService.getBoardById(request.params.id, request.user.sub);
+  const userId = (request.user as { sub?: string }).sub ?? '';
+      const board = await boardService.getBoardById(request.params.id, userId);
       reply.send(board);
     },
   });
@@ -69,7 +72,8 @@ export const boardRoutes: FastifyPluginAsync = async (server) => {
       },
     },
     handler: async (request, reply) => {
-      const board = await boardService.createBoard(request.body, request.user.sub);
+  const userId = (request.user as { sub?: string }).sub ?? '';
+      const board = await boardService.createBoard(request.body, userId);
       reply.status(201).send(board);
     },
   });
@@ -89,10 +93,11 @@ export const boardRoutes: FastifyPluginAsync = async (server) => {
       },
     },
     handler: async (request, reply) => {
+  const userId = (request.user as { sub?: string }).sub ?? '';
       const board = await boardService.updateBoard(
         request.params.id,
         request.body,
-        request.user.sub
+        userId
       );
       reply.send(board);
     },
@@ -112,8 +117,14 @@ export const boardRoutes: FastifyPluginAsync = async (server) => {
       },
     },
     handler: async (request, reply) => {
-      await boardService.deleteBoard(request.params.id, request.user.sub);
+  const userId = (request.user as { sub?: string }).sub ?? '';
+      await boardService.deleteBoard(request.params.id, userId);
       reply.status(204).send();
     },
   });
+
+  /**
+   * POST /boards/:id/invite - Invite a user to the board by email or displayName
+   */
+  // Invitations are handled in the invitations module (POST /boards/:id/invite)
 };

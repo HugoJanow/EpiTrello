@@ -71,6 +71,8 @@ export const boardsApi = {
     fetchApi<unknown>(`/boards/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteBoard: (id: string) =>
     fetchApi<void>(`/boards/${id}`, { method: 'DELETE' }),
+  inviteBoard: (boardId: string, payload: { identifier: string; role?: 'owner' | 'member' | 'viewer' }) =>
+    fetchApi<{ invitedUserId: string; role: 'owner' | 'member' | 'viewer' }>(`/boards/${boardId}/invite`, { method: 'POST', body: JSON.stringify(payload) }),
 };
 
 // Lists API
@@ -135,3 +137,12 @@ export const usersApi = {
     fetchApi<{ ok: boolean }>('/users/password', { method: 'PUT', body: JSON.stringify(data) }),
   deleteMe: () => fetchApi<void>('/users/me', { method: 'DELETE' }),
 };
+
+// Invitations API
+export const invitationsApi = {
+  getMyInvitations: () => fetchApi<{ invitations: unknown[] }>('/users/me/invitations'),
+  acceptInvitation: (id: string) => fetchApi<{ ok: boolean }>(`/invitations/${id}/accept`, { method: 'POST' }),
+  declineInvitation: (id: string) => fetchApi<{ ok: boolean }>(`/invitations/${id}/decline`, { method: 'POST' }),
+  revokeInvitation: (id: string) => fetchApi<{ ok: boolean }>(`/invitations/${id}/revoke`, { method: 'POST' }),
+};
+

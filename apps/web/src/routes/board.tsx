@@ -34,6 +34,7 @@ interface Card {
   dueDate?: string | null;
 }
 import { BoardList } from '@/components/board/board-list';
+import { InviteModal } from '@/components/board/invite-modal';
 import { Card } from '@/components/board/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,6 +83,7 @@ export function BoardPage() {
     },
   });
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -198,6 +200,7 @@ export function BoardPage() {
               <DropdownMenuItem onClick={() => navigate(`/boards/${id}/settings`)}>
                 Settings
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setInviteOpen(true)}>Invite members</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setConfirmOpen(true)} className="text-red-600">
                 <Trash2 className="w-4 h-4 mr-2 inline" /> Delete board
@@ -255,6 +258,7 @@ export function BoardPage() {
         description="This action cannot be undone. All lists and cards inside will be removed."
         onConfirm={() => deleteBoard.mutate(id!)}
       />
+      <InviteModal boardId={id!} open={inviteOpen} onOpenChange={setInviteOpen} />
     </div>
   );
 }

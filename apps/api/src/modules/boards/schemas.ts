@@ -50,3 +50,17 @@ export const boardListSchema = z.object({
 
 export type Board = z.infer<typeof boardSchema>;
 export type BoardList = z.infer<typeof boardListSchema>;
+
+// Invite schema
+export const inviteBoardBodySchema = z.object({
+  identifier: z.string().min(1), // email or displayName
+  role: z.enum(['owner', 'member', 'viewer']).default('member'),
+});
+
+export const inviteBoardResponseSchema = z.object({
+  invitedUserId: z.string(),
+  role: z.enum(['owner', 'member', 'viewer']),
+});
+
+export type InviteBoardInput = z.infer<typeof inviteBoardBodySchema>;
+export type InviteBoardResponse = z.infer<typeof inviteBoardResponseSchema>;
