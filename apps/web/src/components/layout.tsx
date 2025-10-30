@@ -1,5 +1,6 @@
 import { Outlet, Link } from 'react-router-dom';
 import { useAuthStore } from '@/lib/auth-store';
+import { Avatar } from './ui/avatar';
 
 export function Layout() {
   const { user, clearAuth } = useAuthStore();
@@ -20,7 +21,10 @@ export function Layout() {
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/profile" className="text-sm text-gray-700 hover:underline">{user?.displayName}</Link>
+              <Link to="/profile" className="flex items-center gap-2 text-sm text-gray-700 hover:underline">
+                {user ? <Avatar user={user} size="sm" /> : null}
+                <span>{user?.displayName}</span>
+              </Link>
               <button onClick={handleLogout} className="btn btn-secondary text-sm">
                 Logout
               </button>

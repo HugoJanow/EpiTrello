@@ -13,7 +13,7 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
   const { accessToken } = useAuthStore.getState();
   
   const headers: HeadersInit = {
-    ...(options?.body && { 'Content-Type': 'application/json' }),
+    ...(typeof options?.body === 'string' && { 'Content-Type': 'application/json' }),
     ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
     ...options?.headers,
   };
@@ -110,4 +110,24 @@ export const usersApi = {
   getMe: () => fetchApi<{ user: User }>('/users/me'),
   updateMe: (data: { displayName?: string; avatarUrl?: string | null }) =>
     fetchApi<{ user: User }>('/users/me', { method: 'PUT', body: JSON.stringify(data) }),
+  uploadAvatar: async (file: File) => {
+    const { accessToken } = useAuthStore.getState();
+    const fd = new FormData();
+    fd.append('avatar', file, file.name);
+
+    const res = await fetch(`${API_URL}/users/me/avatar`, {
+      method: 'POST',
+      headers: {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      body: fd,
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ error: { message: 'Upload failed' } }));
+      throw new Error(error.error?.message || 'Upload failed');
+    }
+
+    return res.json();
+  },
 };

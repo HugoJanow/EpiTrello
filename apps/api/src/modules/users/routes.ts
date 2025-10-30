@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { UsersService } from './service.js';
 import { updateUserSchema, userResponseSchema } from './schemas.js';
+import { avatarRoute } from './avatar-route.js';
 
 export const usersRoutes: FastifyPluginAsync = async (server) => {
   const usersService = new UsersService(server.prisma);
@@ -40,4 +41,7 @@ export const usersRoutes: FastifyPluginAsync = async (server) => {
       reply.send({ user: updated });
     },
   });
+
+  // Register avatar upload sub-route
+  await server.register(avatarRoute, { prefix: '' });
 };

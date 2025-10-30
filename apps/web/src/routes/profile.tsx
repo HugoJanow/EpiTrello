@@ -56,11 +56,37 @@ export function ProfilePage() {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Avatar URL</label>
-          <input
-            value={avatarUrl ?? ''}
-            onChange={(e) => setAvatarUrl(e.target.value || null)}
-            className="mt-1 block w-full border rounded px-3 py-2"
-          />
+          <div className="flex gap-3 items-start">
+            <input
+              type="text"
+              value={avatarUrl ?? ''}
+              onChange={(e) => setAvatarUrl(e.target.value || null)}
+              className="mt-1 block w-full border rounded px-3 py-2"
+            />
+            <div className="flex flex-col items-start">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    const res = await usersApi.uploadAvatar(file);
+                    const updated = res.user;
+                    // @ts-ignore
+                    useAuthStore.setState({ user: updated });
+                    setAvatarUrl(updated.avatarUrl);
+                  } catch (err) {
+                    // simple feedback
+                     
+                    console.error('Upload failed', err);
+                    alert('Upload failed');
+                  }
+                }}
+                className="mt-1"
+              />
+            </div>
+          </div>
           {avatarUrl ? (
             <img src={avatarUrl} alt="avatar" className="w-24 h-24 rounded mt-3 object-cover" />
           ) : (

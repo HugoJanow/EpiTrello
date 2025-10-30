@@ -1,5 +1,9 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
+import staticPlugin from '@fastify/static';
+import fs from 'fs';
+import path from 'path';
 import {
   serializerCompiler,
   validatorCompiler,
@@ -52,6 +56,18 @@ export async function createServer() {
   // Register plugins
   await server.register(prismaPlugin);
   await server.register(jwtPlugin);
+  // Serve uploaded files from the public/uploads directory at /uploads
+  const publicDir = new URL('../public', import.meta.url).pathname;
+  // ensure public/uploads exists
+  try {
+    fs.mkdirSync(path.join(publicDir, 'uploads', 'avatars'), { recursive: true });
+  } catch {
+    /* ignore */
+  }
+  await server.register(staticPlugin, { root: publicDir, prefix: '/uploads' });
+
+  // Multipart (file uploads)
+  await server.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
   await server.register(errorHandlerPlugin);
 
   // Register routes
